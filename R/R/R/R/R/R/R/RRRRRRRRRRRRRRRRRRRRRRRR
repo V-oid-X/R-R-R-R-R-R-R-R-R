@@ -1,0 +1,102 @@
+-- UI LIB
+local VLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/vep1032/VepStuff/main/Rgb%20Ui"))()
+
+local win = VLib:Window("STRAW HUB", Color3.fromRGB(196, 40, 28))
+
+local main = win:Tab("MAIN")
+local credits = win:Tab("CREDITS")
+
+-- SERVICES
+local RS = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+local LP = Players.LocalPlayer
+
+-- ANTI AFK
+pcall(function()
+    local vu = game:service("VirtualUser")
+    LP.Idled:connect(function()
+        vu:CaptureController()
+        vu:ClickButton2(Vector2.new())
+    end)
+end)
+
+--------------------------------------------------
+-- STRENGTH BAG FARM
+--------------------------------------------------
+main:Toggle("Strength Bag Farm", function(t)
+    getgenv().BagFarm = t
+    while getgenv().BagFarm do
+        task.wait()
+        pcall(function()
+            RS.Attack:FireServer(math.random(1,5))
+        end)
+    end
+end)
+
+--------------------------------------------------
+-- PUSHUPS
+--------------------------------------------------
+main:Toggle("Autofarm Pushups", function(t)
+    getgenv().Pushups = t
+    while getgenv().Pushups do
+        task.wait()
+        pcall(function()
+            RS.Remotes.PushUp:FireServer()
+        end)
+    end
+end)
+
+--------------------------------------------------
+-- SITUPS
+--------------------------------------------------
+main:Toggle("Autofarm Situps", function(t)
+    getgenv().Situps = t
+    while getgenv().Situps do
+        task.wait()
+        pcall(function()
+            RS.Remotes.SitUp:FireServer()
+        end)
+    end
+end)
+
+--------------------------------------------------
+-- BENCHPRESS
+--------------------------------------------------
+main:Toggle("Autofarm Benchpress", function(t)
+    getgenv().Bench = t
+    while getgenv().Bench do
+        task.wait()
+        pcall(function()
+            local args = {
+                [1] = "Workout",
+                [2] = {
+                    ["State"] = "Manual",
+                    ["Name"] = "Benchpress",
+                    ["Action"] = "OneBillion"
+                }
+            }
+            RS.Remotes.Equipment:FireServer(unpack(args))
+        end)
+    end
+end)
+
+--------------------------------------------------
+-- DUMBBELLS
+--------------------------------------------------
+main:Toggle("Autofarm Dumbbells", function(t)
+    getgenv().Dumb = t
+    while getgenv().Dumb do
+        task.wait()
+        pcall(function()
+            RS.Remotes.Dumbell:FireServer("Equip")
+            RS.Remotes.Dumbell:FireServer("Rep",2)
+        end)
+    end
+end)
+
+--------------------------------------------------
+-- CREDITS
+--------------------------------------------------
+credits:Label("Hub Developer: justsscripts")
+credits:Label("UI: Straw / VLib")
+credits:Label("Thank you for using Straw Hub")
