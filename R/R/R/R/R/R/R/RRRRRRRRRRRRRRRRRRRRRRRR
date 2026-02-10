@@ -1,102 +1,166 @@
+--[[
+    STRAW HUB
+    Rayfield Logic Port
+    Credits: justsscripts
+]]
+
 -- UI LIB
-local VLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/vep1032/VepStuff/main/Rgb%20Ui"))()
-
-local win = VLib:Window("STRAW HUB", Color3.fromRGB(196, 40, 28))
-
-local main = win:Tab("MAIN")
-local credits = win:Tab("CREDITS")
+local VLib = loadstring(game:HttpGet(
+    "https://raw.githubusercontent.com/vep1032/VepStuff/main/Rgb%20Ui"
+))()
 
 -- SERVICES
-local RS = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local VirtualUser = game:GetService("VirtualUser")
+local UserInputService = game:GetService("UserInputService")
+
 local LP = Players.LocalPlayer
 
--- ANTI AFK
-pcall(function()
-    local vu = game:service("VirtualUser")
-    LP.Idled:connect(function()
-        vu:CaptureController()
-        vu:ClickButton2(Vector2.new())
-    end)
+-- WINDOW
+local win = VLib:Window("STRAW HUB", Color3.fromRGB(196,40,28))
+local Main = win:Tab("FARMING")
+local Util = win:Tab("UTILITIES")
+local Credits = win:Tab("CREDITS")
+
+-- ================= FLAGS =================
+local PushupFarm = false
+local SitupFarm = false
+local BenchFarm = false
+local DumbbellFarm = false
+local StrengthFarm = false
+local InfiniteJump = false
+
+-- ================= ANTI AFK =================
+LP.Idled:Connect(function()
+    VirtualUser:CaptureController()
+    VirtualUser:ClickButton2(Vector2.new())
 end)
 
---------------------------------------------------
--- STRENGTH BAG FARM
---------------------------------------------------
-main:Toggle("Strength Bag Farm", function(t)
-    getgenv().BagFarm = t
-    while getgenv().BagFarm do
-        task.wait()
-        pcall(function()
-            RS.Attack:FireServer(math.random(1,5))
-        end)
-    end
-end)
+-- ================= AUTOFARMS (RAYFIELD LOGIC) =================
 
---------------------------------------------------
 -- PUSHUPS
---------------------------------------------------
-main:Toggle("Autofarm Pushups", function(t)
-    getgenv().Pushups = t
-    while getgenv().Pushups do
-        task.wait()
-        pcall(function()
-            RS.Remotes.PushUp:FireServer()
-        end)
+task.spawn(function()
+    while task.wait(0.1) do
+        if PushupFarm then
+            ReplicatedStorage.Remotes.Equipment:FireServer(
+                "Workout",
+                {State="Manual", Name="PushUp", Action="OneBillion"}
+            )
+        end
     end
 end)
 
---------------------------------------------------
 -- SITUPS
---------------------------------------------------
-main:Toggle("Autofarm Situps", function(t)
-    getgenv().Situps = t
-    while getgenv().Situps do
-        task.wait()
-        pcall(function()
-            RS.Remotes.SitUp:FireServer()
-        end)
+task.spawn(function()
+    while task.wait(0.1) do
+        if SitupFarm then
+            ReplicatedStorage.Remotes.Equipment:FireServer(
+                "Workout",
+                {State="Manual", Name="SitUp", Action="OneBillion"}
+            )
+        end
     end
 end)
 
---------------------------------------------------
 -- BENCHPRESS
---------------------------------------------------
-main:Toggle("Autofarm Benchpress", function(t)
-    getgenv().Bench = t
-    while getgenv().Bench do
-        task.wait()
-        pcall(function()
-            local args = {
-                [1] = "Workout",
-                [2] = {
-                    ["State"] = "Manual",
-                    ["Name"] = "Benchpress",
-                    ["Action"] = "OneBillion"
+task.spawn(function()
+    while task.wait() do
+        if BenchFarm then
+            ReplicatedStorage.Remotes.Equipment:FireServer(
+                "Workout",
+                {
+                    State = "Manual",
+                    Name = "Benchpress",
+                    Action = "OneThousand"
                 }
-            }
-            RS.Remotes.Equipment:FireServer(unpack(args))
-        end)
+            )
+        end
     end
 end)
 
---------------------------------------------------
 -- DUMBBELLS
---------------------------------------------------
-main:Toggle("Autofarm Dumbbells", function(t)
-    getgenv().Dumb = t
-    while getgenv().Dumb do
-        task.wait()
-        pcall(function()
-            RS.Remotes.Dumbell:FireServer("Equip")
-            RS.Remotes.Dumbell:FireServer("Rep",2)
-        end)
+task.spawn(function()
+    while task.wait(0.1) do
+        if DumbbellFarm then
+            ReplicatedStorage.Remotes.Equipment:FireServer(
+                "Workout",
+                {State="Manual", Name="Dumbbell", Action="OneBillion"}
+            )
+        end
     end
 end)
 
---------------------------------------------------
--- CREDITS
---------------------------------------------------
-credits:Label("Hub Developer: justsscripts")
-credits:Label("UI: Straw / VLib")
-credits:Label("Thank you for using Straw Hub")
+-- ================= STRENGTH (PUNCHING BAG) =================
+task.spawn(function()
+    local DamageRemote = ReplicatedStorage:WaitForChild("DamageRemote")
+
+    while task.wait() do
+        if StrengthFarm then
+            pcall(function()
+                local char = LP.Character
+                local hrp = char and char:FindFirstChild("HumanoidRootPart")
+                if not hrp then return end
+
+                for _,obj in pairs(workspace:GetDescendants()) do
+                    if obj:IsA("Model") and obj.Name == "PunchingBag" then
+                        local bag = obj:FindFirstChild("Bag", true)
+                        local hum = obj:FindFirstChildOfClass("Humanoid")
+
+                        if bag and hum then
+                            if (hrp.Position - bag.Position).Magnitude <= 8 then
+                                DamageRemote:FireServer(hum, 9e18, false)
+                            end
+                        end
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+-- ================= UI =================
+
+Main:Toggle("Autofarm Pushups", function(v)
+    PushupFarm = v
+end)
+
+Main:Toggle("Autofarm Situps", function(v)
+    SitupFarm = v
+end)
+
+Main:Toggle("Autofarm Benchpress", function(v)
+    BenchFarm = v
+end)
+
+Main:Toggle("Autofarm Dumbbells", function(v)
+    DumbbellFarm = v
+end)
+
+Main:Toggle("Autofarm Strength (Bags)", function(v)
+    StrengthFarm = v
+end)
+
+-- ================= UTILITIES =================
+
+Util:Toggle("Infinite Jump", function(v)
+    InfiniteJump = v
+end)
+
+UserInputService.JumpRequest:Connect(function()
+    if InfiniteJump then
+        local hum = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
+        if hum then
+            hum:ChangeState(Enum.HumanoidStateType.Jumping)
+        end
+    end
+end)
+
+-- ================= CREDITS =================
+
+Credits:Label("STRAW HUB")
+Credits:Label("Scripts by justsscripts")
+
+Credits:Button("Copy Discord", function()
+    setclipboard("https://discord.gg/73jRJuYrnc")
+end)
