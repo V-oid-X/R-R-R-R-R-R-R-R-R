@@ -1,0 +1,97 @@
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local Window = Rayfield:CreateWindow({
+   Name = "Train Destroyer GUI",
+   LoadingTitle = "Train System",
+   LoadingSubtitle = "Ultra Fast Mode",
+   ConfigurationSaving = {Enabled = false}
+})
+
+local Tab = Window:CreateTab("Main", 4483362458)
+
+local speedValue = 100
+local clickAmount = 50
+local autoClick = false
+local zeroDelay = false
+
+local TrainSystem = game:GetService("ReplicatedStorage")
+    :WaitForChild("Remote")
+    :WaitForChild("TrainSystem")
+
+-- SPEED SLIDER
+Tab:CreateSlider({
+   Name = "Train Speed",
+   Range = {0, 10^30},
+   Increment = 1,
+   CurrentValue = 100,
+   Callback = function(Value)
+      speedValue = Value
+   end,
+})
+
+-- CLICK SPAM
+Tab:CreateSlider({
+   Name = "Clicks Per Loop",
+   Range = {1, 1000},
+   Increment = 1,
+   CurrentValue = 50,
+   Callback = function(Value)
+      clickAmount = Value
+   end,
+})
+
+-- AUTO CLICK
+Tab:CreateToggle({
+   Name = "Auto Click Train",
+   CurrentValue = false,
+   Callback = function(Value)
+      autoClick = Value
+   end,
+})
+
+-- ZERO DELAY MODE
+Tab:CreateToggle({
+   Name = "0 Delay Spam Mode",
+   CurrentValue = false,
+   Callback = function(Value)
+      zeroDelay = Value
+   end,
+})
+
+-- BREAK SPEED LIMIT BUTTON
+Tab:CreateButton({
+   Name = "Break Train Speed Limit",
+   Callback = function()
+      speedValue = 999999999999999999999999
+   end,
+})
+
+-- SPEED LOOP
+task.spawn(function()
+    while true do
+        if zeroDelay then
+            task.wait()
+        else
+            task.wait(0.05)
+        end
+
+        TrainSystem:WaitForChild("ReqUpdateTrainSpeed"):InvokeServer(speedValue)
+    end
+end)
+
+-- CLICK LOOP
+task.spawn(function()
+    while true do
+        if zeroDelay then
+            task.wait()
+        else
+            task.wait(0.05)
+        end
+
+        if autoClick then
+            for i = 1, clickAmount do
+                TrainSystem:WaitForChild("ReqClickTrain"):InvokeServer()
+            end
+        end
+    end
+end)
